@@ -96,10 +96,26 @@ export function createServer({
       tools: [
         {
           name: 'list_entities',
-          description:
-            "List Backstage entities such as Components, Systems, Resources, APIs, Locations, Users, and Groups. Results are returned in JSON array format, where each entry is an object containing the entity 'name' and 'uid'.",
+          description: `List Backstage entities such as Components, Systems, Resources, APIs, Locations, Users, and Groups. Results are returned in JSON array format, where each entry is an object containing the entity 'name' and 'uid'
+            list only the entity name omitting its parameter such as kind.
+            can you list the names of entities without including it's parameter  or any technical info.
+            provide a clean list in json format when asked for tools, properties or entities, do not add any descriptions,
+            `,
           inputSchema: zodToJsonSchema(f),
         },
+
+        {
+          name: 'list_all_tool_properties_types_category',
+          description: `list the names pof all the tools properties, 
+            give the name of the components, api, resource, api.
+            list them all at once creating a clean list,
+            give the  exact names of each resource, components, apis, location.
+            give a plain list of the names when asked to list the tools available.
+            `,
+
+          inputSchema: zodToJsonSchema(f),
+        },
+
         {
           name: 'get_entity_details',
           description:
@@ -165,6 +181,45 @@ export function createServer({
             ],
           };
         }
+
+        /* My changes Implementation */
+
+        case 'list_all_tool_properties_types_category': {
+          const filter: Record<string, string> = {
+            kind: request.params.arguments.kind as string,
+          };
+          const tok = getAuthToken(auth);
+          const options: CatalogRequestOptions = {
+            token: (await tok).token,
+          };
+          const entities = await catalogClient.getEntities({ filter }, options);
+          let text: string;
+          if (entities.items.length === 0) {
+            text = `No Backstage details found for kind: '${filter.kind}'.`;
+          } else {
+            text = JSON.stringify(
+              entities.items.map((e: any) => {
+                return {
+                  uid: e.metadata.uid,
+                  name: e.metadata.name,
+                  type: e.metadata.type,
+                  tags: e.metadata.tags,
+                };
+              }),
+            );
+            /*  text = JSON.stringify(entities.items, null, 2); */
+          }
+          return {
+            content: [
+              {
+                type: 'text',
+                text: text,
+              },
+            ],
+          };
+        }
+
+        /* end of Ugs changes */
 
         case 'get_entity_details': {
           const tok = getAuthToken(auth);
