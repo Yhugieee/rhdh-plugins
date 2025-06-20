@@ -106,11 +106,22 @@ export function createServer({
 
         {
           name: 'list_all_tool_properties_types_category',
-          description: `list the names pof all the tools properties, 
-            give the name of the components, api, resource, api.
+          description: `list the names of all the tools properties, 
+            give the name of the components, api, resource, location.
             list them all at once creating a clean list,
             give the  exact names of each resource, components, apis, location.
             give a plain list of the names when asked to list the tools available.
+
+            Examples of how to call ... there is only one way to call this tool,
+            as it does not take any parameters.
+            - list_all_tool_properties_types_category()
+
+
+            THe output of this is a json array with the following fields:
+            - the 'name' field is a string that shows the human readable name
+            - the 'uid' field is a string used to identify the tool 
+            - the 'type' is a readable string for the tool category
+            - the 'tag' is a readable string for descriptive labels of the tool.
             `,
 
           inputSchema: zodToJsonSchema(f),
